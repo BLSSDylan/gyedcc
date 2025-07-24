@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administración del Club</title>
+  <style>
+    body { font-family: Arial; background: #f7f7f7; padding: 20px; }
+    form, .tabla-container {
+      background: #fff; padding: 20px; border-radius: 10px;
+      max-width: 600px; margin: 20px auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; }
+    label { display: block; margin-top: 15px; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px; width: 100%; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #007bff; color: white; }
+  </style>
+</head>
+<body>
+
+  <!-- Formulario para registrar socio -->
+  <form id="formSocio">
+    <h2>Registrar Socio</h2>
+    <label>Nombre:</label>
+    <input type="text" name="nombre" required>
+
+    <label>Celular:</label>
+    <input type="tel" name="celular" required>
+
+    <label>Categoría:</label>
+    <select name="categoria" required>
+      <option value="Adulto">Adulto</option>
+      <option value="Juvenil">Juvenil</option>
+      <option value="Niño">Niño</option>
+    </select>
+
+    <label>Deporte:</label>
+    <select name="deporte" required>
+      <option value="Fútbol">Fútbol</option>
+      <option value="Básquet">Básquet</option>
+      <option value="Tenis">Tenis</option>
+      <option value="Natación">Natación</option>
+    </select>
+
+    <label>ID de Socio:</label>
+    <input type="text" name="id_socio" required>
+
+    <label>Tipo de Cuota:</label>
+    <input type="text" name="tipo_cuota" required>
+
+    <label>Precio ($):</label>
+    <input type="number" name="precio" required>
+
+    <label>Vencimiento:</label>
+    <input type="date" name="vencimiento" required>
+
+    <button type="submit">Registrar Socio</button>
+  </form>
+
+  <!-- Tabla de socios -->
+  <div class="tabla-container">
+    <h2>Socios Registrados</h2>
+    <table id="tablaSocios">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Celular</th>
+          <th>Categoría</th>
+          <th>Deporte</th>
+          <th>ID</th>
+          <th>Cuota</th>
+          <th>Precio</th>
+          <th>Vencimiento</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const URL_POST = "https://blssdylannn.app.n8n.cloud/webhook-test/registro-socio"; // CAMBIAR
+    const URL_GET = "https://blssdylannn.app.n8n.cloud/webhook-test/get_socio"; // CAMBIAR
+
+    // Envío del formulario
+    document.getElementById('formSocio').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+
+      const response = await fetch(URL_POST, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        alert('Socio registrado con éxito');
+        e.target.reset();
+        cargarSocios(); // recarga la tabla
+      } else {
+        alert('Error al registrar socio');
+      }
+    });
+
+    // Carga de socios desde planilla/n8n
+    async function cargarSocios() {
+      const res = await fetch(URL_GET);
+      const socios = await res.json();
+      const tbody = document.querySelector("#tablaSocios tbody");
+      tbody.innerHTML = ""; // limpiar tabla
+
+      socios.forEach(s => {
+        const fila = `
+          <tr>
+            <td>${s.nombre || ""}</td>
+            <td>${s.celular || ""}</td>
+            <td>${s.categoria || ""}</td>
+            <td>${s.deporte || ""}</td>
+            <td>${s.id_socio || ""}</td>
+            <td>${s.tipo_cuota || ""}</td>
+            <td>${s.precio || ""}</td>
+            <td>${s.vencimiento || ""}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML('beforeend', fila);
+      });
+    }
+
+    cargarSocios();
+  </script>
+</body>
+</html>
